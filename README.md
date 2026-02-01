@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KasTrack (KasBidang)
 
-## Getting Started
+Aplikasi manajemen keuangan untuk mengontrol pemasukan dan pengeluaran. Dibangun dengan Next.js 14, Supabase, dan Tailwind CSS.
 
-First, run the development server:
+## Fitur
+
+- **Transaksi** — Catat, edit, hapus transaksi. Filter berdasarkan kategori, bulan, tipe, rentang tanggal. Pencarian dan sort.
+- **Dashboard** — Grafik tren 6 bulan, bar/line chart, tooltip format Rupiah.
+- **Laporan Kategori** — Breakdown per kategori, pie chart, perbandingan antar bulan.
+- **Multi-Dompet** — Beberapa dompet, switch aktif, transfer antar dompet, overview saldo. Admin: tambah user, assign wallet+role, undang via link, daftar user aktif.
+- **Export & Import** — Export CSV, backup JSON, import CSV dengan validasi.
+- **PWA** — Install ke home screen, dukungan offline untuk halaman yang pernah dibuka.
+- **Tema** — Mode gelap dan terang (dark/light).
+- **Kategori** — Kelola kategori pemasukan dan pengeluaran per dompet.
+
+## Tech Stack
+
+- **Framework:** Next.js 14 (App Router)
+- **Database & Auth:** Supabase (PostgreSQL, Auth, RLS)
+- **Styling:** Tailwind CSS, shadcn/ui (Radix UI)
+- **Charts:** Recharts
+- **Font:** Inter (Google Fonts)
+
+## Persiapan
+
+1. **Node.js** 18+ dan npm
+2. **Akun Supabase** — [supabase.com](https://supabase.com)
+3. **Database** — Jalankan `supabase/init.sql` di Supabase SQL Editor (lihat [supabase/README.md](supabase/README.md))
+
+## Setup Lokal
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clone (jika dari repo)
+git clone <repo-url>
+cd kasbidang
+
+# Install dependency
+npm install
+
+# Copy env dan isi nilai
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Variabel environment (`.env.local`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...   # Untuk fitur admin buat user (opsional)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Ambil URL dan key dari **Supabase Dashboard** → Project → **Settings** → **API**.  
+`SUPABASE_SERVICE_ROLE_KEY` dari **API** → **service_role** (secret).
 
-## Learn More
+## Menjalankan
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Development
+npm run dev
+# Buka http://localhost:3000
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Build production
+npm run build
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Jalankan production
+npm start
+```
 
-## Deploy on Vercel
+## Deploy ke Server
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Jangan upload `.env.local`. Set variabel env di panel hosting (Vercel, Railway, dll.).
+- Detail: lihat [UPLOAD_KE_SERVER.md](UPLOAD_KE_SERVER.md).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Vercel
+
+1. Import project dari Git
+2. Set env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (jika pakai fitur admin buat user)
+3. Deploy
+
+## Struktur Project
+
+```
+kasbidang/
+├── public/           # manifest.json, sw.js (PWA)
+├── src/
+│   ├── app/          # Halaman (dashboard, transaksi, kategori, laporan, dompet, pengaturan, invite, login)
+│   ├── components/   # UI, wallet, settings, transactions, reports, pwa
+│   └── lib/          # data, actions, supabase client, utils, export, import
+├── supabase/
+│   ├── init.sql      # DDL awal database (satu file)
+│   └── README.md     # Panduan setup Supabase
+├── README.md
+├── REKOMENDASI_FITUR.md
+└── UPLOAD_KE_SERVER.md
+```
+
+## Dokumen Lain
+
+- **[supabase/README.md](supabase/README.md)** — Setup database Supabase
+- **[REKOMENDASI_FITUR.md](REKOMENDASI_FITUR.md)** — Daftar fitur dan progress implementasi
+- **[UPLOAD_KE_SERVER.md](UPLOAD_KE_SERVER.md)** — Checklist upload ke server
+
+## Lisensi
+
+Private / sesuai kebijakan project.
