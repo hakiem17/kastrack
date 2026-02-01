@@ -1,7 +1,7 @@
 {
-  "name": "KasBidang",
-  "short_name": "KasBidang",
-  "description": "Aplikasi KasBidang - Kelola keuangan dan dompet",
+  "name": "KasTrack",
+  "short_name": "KasTrack",
+  "description": "Aplikasi KasTrack - Kelola keuangan dan dompet",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

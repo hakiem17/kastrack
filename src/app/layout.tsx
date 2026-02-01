@@ -8,14 +8,14 @@ import { RegisterSW } from "@/components/pwa/RegisterSW";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "KasBidang",
-  description: "Aplikasi KasBidang - Kelola keuangan dan dompet",
+  title: "KasTrack",
+  description: "Aplikasi KasTrack - Kelola keuangan dan dompet",
   manifest: "/manifest.json",
   icons: { apple: "/favicon.ico" },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "KasBidang",
+    title: "KasTrack",
   },
 };
 
