@@ -9,7 +9,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Download, FileText, Database, FileSpreadsheet } from "lucide-react"
+import { Download, Database, FileSpreadsheet } from "lucide-react"
 import { transactionsToCSV, downloadCSV, createBackupData, exportBackup } from "@/lib/export"
 import { Transaction } from "@/lib/data"
 

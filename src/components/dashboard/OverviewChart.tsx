@@ -21,12 +21,13 @@ export function OverviewChart({ data }: { data: any[] }) {
         }
     }
 
-    const CustomTooltip = ({ active, payload, label }: any) => {
+    type TooltipPayload = { name?: string; value?: number; color?: string }
+    const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: TooltipPayload[]; label?: string }) => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-lg">
                     <p className="font-semibold mb-2 text-slate-900 dark:text-slate-100">{label}</p>
-                    {payload.map((entry: any, index: number) => (
+                    {payload.map((entry: TooltipPayload, index: number) => (
                         <p key={index} className="text-sm" style={{ color: entry.color }}>
                             <span className="font-medium">{entry.name === 'Income' ? 'Pemasukan' : 'Pengeluaran'}:</span>{' '}
                             {formatCurrency(entry.value)}

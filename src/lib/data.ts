@@ -332,7 +332,8 @@ export async function getTransactions(
         const sortOrder = filters?.sortOrder || 'desc'
         
         result.sort((a, b) => {
-            let aVal: any, bVal: any
+            let aVal: number | string
+            let bVal: number | string
             
             if (sortBy === 'amount') {
                 aVal = Number(a.amount)

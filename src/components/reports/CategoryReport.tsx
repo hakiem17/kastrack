@@ -51,7 +51,8 @@ export function CategoryReport({ incomeBreakdown, expenseBreakdown, incomeMonthl
         return data
     })
 
-    const CustomTooltip = ({ active, payload }: any) => {
+    type TooltipPayloadItem = { name?: string; value?: number; color?: string; payload?: { fill?: string; percentage?: number } }
+    const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayloadItem[] }) => {
         if (active && payload && payload.length) {
             const data = payload[0]
             return (
