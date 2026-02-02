@@ -9,7 +9,7 @@ export function RegisterSW() {
             "serviceWorker" in navigator
         ) {
             navigator.serviceWorker
-                .register("/sw.js")
+                .register("/sw.js", { updateViaCache: "none" })
                 .then((reg) => {
                     if (reg.installing) {
                         console.log("[PWA] Service worker installing")
