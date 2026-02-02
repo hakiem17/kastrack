@@ -10,7 +10,7 @@ export default async function InvitePage({
     searchParams?: { [key: string]: string | string[] | undefined }
 }) {
     const token = typeof searchParams?.token === "string" ? searchParams.token : null
-    const supabase = createClient()
+    const supabase = await createClient()
     const {
         data: { user },
     } = await supabase.auth.getUser()

@@ -7,7 +7,7 @@ import { cookies } from 'next/headers'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export async function createWallet(prevState: any, formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const name = formData.get('name') as string
 
     if (!name) return { error: "Name is required" }
@@ -29,7 +29,7 @@ export async function createWallet(prevState: any, formData: FormData) {
             return { error: "Failed to create wallet (No ID returned)" }
         }
 
-        cookies().set('active_wallet_id', walletId, {
+        ;(await cookies()).set('active_wallet_id', walletId, {
             path: '/',
             maxAge: 60 * 60 * 24 * 365,
         })
@@ -45,7 +45,7 @@ export async function createWallet(prevState: any, formData: FormData) {
 }
 
 export async function createWalletAndStay(formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const name = formData.get('name') as string
 
     if (!name) return { error: "Name is required" }
@@ -65,7 +65,7 @@ export async function createWalletAndStay(formData: FormData) {
             return { error: "Failed to create wallet (No ID returned)" }
         }
 
-        cookies().set('active_wallet_id', walletId, {
+        ;(await cookies()).set('active_wallet_id', walletId, {
             path: '/',
             maxAge: 60 * 60 * 24 * 365,
         })
@@ -81,7 +81,7 @@ export async function createWalletAndStay(formData: FormData) {
 }
 
 export async function setActiveWallet(formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const walletId = formData.get('walletId') as string
     const redirectTo = formData.get('redirectTo') as string | null
 
@@ -99,7 +99,7 @@ export async function setActiveWallet(formData: FormData) {
         return { error: 'Dompet tidak valid atau tidak memiliki akses' }
     }
 
-    cookies().set('active_wallet_id', walletId, {
+    ;(await cookies()).set('active_wallet_id', walletId, {
         path: '/',
         maxAge: 60 * 60 * 24 * 365,
     })
@@ -122,7 +122,7 @@ async function getOrCreateTransferCategory(
     type: 'income' | 'expense',
     name: string
 ) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: existing } = await supabase
         .from('categories')
         .select('id')
@@ -152,7 +152,7 @@ async function getOrCreateTransferCategory(
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export async function transferBetweenWallets(prevState: any, formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const fromWalletId = formData.get('fromWalletId') as string
     const toWalletId = formData.get('toWalletId') as string
     const amountRaw = formData.get('amount') as string
@@ -238,7 +238,7 @@ export async function transferBetweenWallets(prevState: any, formData: FormData)
 }
 
 export async function createTransaction(walletId: string, formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const amount = formData.get('amount')
     const description = formData.get('description')
@@ -268,7 +268,7 @@ export async function createTransaction(walletId: string, formData: FormData) {
 }
 
 export async function createCategory(walletId: string, formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const name = formData.get('name') as string
     const type = formData.get('type') as string
@@ -297,7 +297,7 @@ export async function createCategory(walletId: string, formData: FormData) {
 }
 
 export async function updateCategory(categoryId: string, formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const name = formData.get('name') as string
     const type = formData.get('type') as string
@@ -326,7 +326,7 @@ export async function updateCategory(categoryId: string, formData: FormData) {
 }
 
 export async function deleteCategory(categoryId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase
         .from('categories')
@@ -341,7 +341,7 @@ export async function deleteCategory(categoryId: string) {
 }
 
 export async function updateTransaction(transactionId: string, formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const amount = formData.get('amount')
     const description = formData.get('description')
@@ -370,7 +370,7 @@ export async function updateTransaction(transactionId: string, formData: FormDat
 }
 
 export async function deleteTransaction(transactionId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase
         .from('transactions')
@@ -393,7 +393,7 @@ export interface ImportTransactionData {
 }
 
 export async function importTransactions(walletId: string, transactions: ImportTransactionData[]) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const errors: string[] = []
     let successCount = 0
 
@@ -482,7 +482,7 @@ export async function importTransactions(walletId: string, transactions: ImportT
 // ---------- Settings: undangan & akses wallet (hanya admin) ----------
 
 export async function createWalletInvite(formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const walletId = formData.get('walletId') as string
     const email = (formData.get('email') as string)?.trim()
     const role = (formData.get('role') as string) || 'viewer'
@@ -529,7 +529,7 @@ export async function createWalletInvite(formData: FormData) {
 }
 
 export async function removeWalletMember(walletId: string, userId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase
         .from('wallet_members')
@@ -550,7 +550,7 @@ export async function updateWalletMemberRole(formData: FormData) {
         return { error: 'Data tidak valid.' }
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { error } = await supabase
         .from('wallet_members')
         .update({ role })
@@ -563,7 +563,7 @@ export async function updateWalletMemberRole(formData: FormData) {
 }
 
 export async function acceptWalletInvite(token: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user?.email) {
         return { success: false, error: 'Anda harus masuk dengan akun yang sesuai undangan.' }
@@ -590,7 +590,7 @@ export async function acceptWalletInvite(token: string) {
 }
 
 export async function deleteWalletInvite(walletId: string, inviteId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { error } = await supabase
         .from('wallet_invites')
         .delete()
@@ -603,7 +603,7 @@ export async function deleteWalletInvite(walletId: string, inviteId: string) {
 
 /** Jadikan user saat ini admin di semua wallet yang ia ikuti (satu kali, untuk koreksi data). */
 export async function setSelfAdminAllWallets() {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data, error } = await supabase.rpc('set_self_admin_all_wallets')
     if (error) return { error: error.message }
     const result = data as { success?: boolean; error?: string; updated?: number }
@@ -615,7 +615,7 @@ export async function setSelfAdminAllWallets() {
 
 /** Admin membuat akun user baru dan memilih wallet yang boleh diakses. User hanya akan melihat wallet yang diizinkan. */
 export async function createUserByAdmin(formData: FormData) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user: currentUser } } = await supabase.auth.getUser()
     if (!currentUser) return { error: 'Anda harus masuk sebagai admin.' }
 

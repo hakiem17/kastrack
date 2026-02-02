@@ -22,8 +22,8 @@ export interface WalletSummary {
 }
 
 export async function getActiveWallet() {
-    const supabase = createClient()
-    const cookieStore = cookies()
+    const supabase = await createClient()
+    const cookieStore = await cookies()
     const activeWalletId = cookieStore.get('active_wallet_id')?.value
 
     if (activeWalletId) {
@@ -53,7 +53,7 @@ export async function getActiveWallet() {
 
 /** Daftar wallet yang **Anda** ikuti (satu baris per wallet, tanpa duplikat). */
 export async function getWallets() {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return []
 
@@ -80,7 +80,7 @@ export interface WalletWithRole {
 
 /** Daftar wallet dengan role **Anda** (user saat ini); gunakan untuk filter admin saja di Settings */
 export async function getWalletsWithRole(): Promise<WalletWithRole[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return []
 
@@ -106,7 +106,7 @@ export interface WalletMemberRow {
 }
 
 export async function getWalletMembers(walletId: string): Promise<WalletMemberRow[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data } = await supabase
         .from('wallet_members')
         .select('user_id, role')
@@ -125,7 +125,7 @@ export interface WalletInviteRow {
 }
 
 export async function getWalletInvites(walletId: string): Promise<WalletInviteRow[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data } = await supabase
         .from('wallet_invites')
         .select('id, email, role, token, expires_at, created_at')
@@ -144,7 +144,7 @@ export interface ActiveUserWithWallets {
 export async function getActiveUsersWithWallets(adminWalletIds: string[]): Promise<ActiveUserWithWallets[]> {
     if (adminWalletIds.length === 0) return []
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data } = await supabase
         .from('wallet_members')
         .select('user_id, wallet_id, role, wallets(id, name)')
@@ -174,7 +174,7 @@ export async function getWalletSummaries(): Promise<WalletSummary[]> {
     const wallets = await getWallets()
     if (wallets.length === 0) return []
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data } = await supabase
         .from('transactions')
         .select('wallet_id, amount, categories(type)')
@@ -202,7 +202,7 @@ export async function getWalletSummaries(): Promise<WalletSummary[]> {
 }
 
 export async function getDashboardStats(walletId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const start = startOfMonth(new Date()).toISOString()
     const end = endOfMonth(new Date()).toISOString()
 
@@ -266,7 +266,7 @@ export async function getTransactions(
     offset = 0,
     filters?: TransactionFilters
 ) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     let query = supabase
         .from('transactions')
@@ -358,7 +358,7 @@ export async function getTransactions(
 }
 
 export async function getCategories(walletId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data } = await supabase
         .from('categories')
         .select('id, name, type')
@@ -368,7 +368,7 @@ export async function getCategories(walletId: string) {
 }
 
 export async function getTransaction(transactionId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data, error } = await supabase
         .from('transactions')
         .select(`
@@ -398,7 +398,7 @@ export async function getTransaction(transactionId: string) {
 }
 
 export async function getMonthlyReport(walletId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
     const today = new Date()
     const startDate = startOfMonth(subMonths(today, 5))
     const endDate = endOfMonth(today)
@@ -465,7 +465,7 @@ export async function getCategoryBreakdown(
     startDate?: string,
     endDate?: string
 ): Promise<CategoryBreakdown[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     let query = supabase
         .from('transactions')
@@ -532,7 +532,7 @@ export async function getCategoryMonthlyComparison(
     type: 'income' | 'expense',
     months: number = 6
 ): Promise<CategoryMonthlyComparison[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
     const today = new Date()
     const startDate = startOfMonth(subMonths(today, months - 1))
     const endDate = endOfMonth(today)
