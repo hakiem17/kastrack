@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { useFormState, useFormStatus } from "react-dom"
+import { useEffect, useMemo, useState, useActionState } from "react"
+import { useFormStatus } from "react-dom"
 import { transferBetweenWallets } from "@/lib/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,7 +26,7 @@ const initialState = {
 
 export function WalletTransferForm({ wallets, activeWalletId }: WalletTransferFormProps) {
     const today = useMemo(() => format(new Date(), "yyyy-MM-dd"), [])
-    const [state, formAction] = useFormState(transferBetweenWallets, initialState)
+    const [state, formAction] = useActionState(transferBetweenWallets, initialState)
     const [fromWalletId, setFromWalletId] = useState(activeWalletId || "")
     const [toWalletId, setToWalletId] = useState("")
 

@@ -6,11 +6,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatCurrency(amount: number) {
-  // Format Rupiah Indonesia dengan format yang lebih jelas
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
+  // Format Rupiah Indonesia secara konsisten antara server & client
+  const formatted = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   }).format(amount)
+
+  // Normalisasi: selalu pakai satu spasi biasa setelah "Rp"
+  // Beberapa runtime memakai non‑breaking space / tidak ada spasi → bisa sebabkan error hydration
+  return formatted.replace(/^Rp[\s\u00A0]*/, "Rp ")
 }
