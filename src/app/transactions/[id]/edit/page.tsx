@@ -5,12 +5,20 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export default async function EditTransactionPage({
     params,
 }: {
     params: Promise<{ id: string }>
 }) {
-    const { id } = await params
+    const resolved = await params
+    const id = typeof resolved?.id === 'string' ? resolved.id.trim() : ''
+
+    if (!id || !UUID_REGEX.test(id)) {
+        notFound()
+    }
+
     const transaction = await getTransaction(id)
 
     if (!transaction) {
