@@ -8,9 +8,10 @@ import { notFound } from "next/navigation"
 export default async function EditTransactionPage({
     params,
 }: {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }) {
-    const transaction = await getTransaction(params.id)
+    const { id } = await params
+    const transaction = await getTransaction(id)
 
     if (!transaction) {
         notFound()
