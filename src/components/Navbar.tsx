@@ -24,8 +24,8 @@ export function Navbar() {
 
     return (
         <>
-            {/* Desktop Sidebar */}
-            <aside className="hidden md:flex fixed left-0 top-0 h-full w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950/50 backdrop-blur-xl shadow-xl z-50">
+            {/* Desktop Sidebar (lg+: iPad landscape & desktop) */}
+            <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950/50 backdrop-blur-xl shadow-xl z-50">
                 <div className="flex h-20 items-center gap-3 border-b border-slate-200 dark:border-slate-800 px-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
                     <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
                         <span className="text-white font-bold text-lg">K</span>
@@ -69,8 +69,8 @@ export function Navbar() {
                 </nav>
             </aside>
 
-            {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-20 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-2xl flex items-center justify-around px-2 pb-safe">
+            {/* Mobile & Tablet Bottom Navigation (sampai lg; termasuk iPad portrait) */}
+            <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 min-h-[5rem] w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-2xl flex items-center justify-around px-2 pb-safe">
                 {navItems.map((item) => {
                     const Icon = item.icon
                     const isActive = pathname === item.href

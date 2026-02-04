@@ -101,9 +101,9 @@ export default async function TransactionsPage({
                 </div>
             )}
 
-            {/* Desktop Table */}
-            <div className="hidden md:block rounded-xl border-0 shadow-lg bg-white dark:bg-slate-900 overflow-hidden">
-                <Table>
+            {/* Desktop/Tablet Table (scroll horizontal di layar sempit) */}
+            <div className="hidden md:block rounded-xl border-0 shadow-lg bg-white dark:bg-slate-900 overflow-hidden overflow-x-auto">
+                <Table className="min-w-[640px]">
                     <TableHeader>
                         <TableRow className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-0">
                             <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Tanggal</TableHead>
