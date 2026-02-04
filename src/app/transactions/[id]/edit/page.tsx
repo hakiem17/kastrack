@@ -1,4 +1,4 @@
-import { getActiveWallet, getCategories, getTransaction } from "@/lib/data"
+import { getCategories, getTransaction } from "@/lib/data"
 import { TransactionForm } from "@/components/transactions/TransactionForm"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -10,22 +10,13 @@ export default async function EditTransactionPage({
 }: {
     params: { id: string }
 }) {
-    const wallet = await getActiveWallet()
-
-    if (!wallet) {
-        return (
-            <div className="max-w-2xl mx-auto space-y-8">
-                <p className="text-center text-slate-600 dark:text-slate-400">Dompet tidak ditemukan</p>
-            </div>
-        )
-    }
-
     const transaction = await getTransaction(params.id)
-    const categories = await getCategories(wallet.id)
 
     if (!transaction) {
         notFound()
     }
+
+    const categories = await getCategories(transaction.wallet_id)
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
@@ -45,7 +36,7 @@ export default async function EditTransactionPage({
 
             <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border-0 shadow-xl">
                 <TransactionForm 
-                    walletId={wallet.id} 
+                    walletId={transaction.wallet_id} 
                     categories={categories || []} 
                     transaction={transaction}
                 />

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from './supabase/server'
+import { getActiveWallet } from './data'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
@@ -249,10 +250,13 @@ export async function createTransaction(walletId: string, formData: FormData) {
         return { error: "Missing required fields" }
     }
 
+    const activeWallet = await getActiveWallet()
+    const walletIdToUse = activeWallet?.id ?? walletId
+
     const { error } = await supabase
         .from('transactions')
         .insert({
-            wallet_id: walletId,
+            wallet_id: walletIdToUse,
             user_id: (await supabase.auth.getUser()).data.user?.id,
             category_id: categoryId,
             amount: parseFloat(amount as string),
@@ -281,10 +285,13 @@ export async function createCategory(walletId: string, formData: FormData) {
         return { error: "Tipe kategori tidak valid" }
     }
 
+    const activeWallet = await getActiveWallet()
+    const walletIdToUse = activeWallet?.id ?? walletId
+
     const { error } = await supabase
         .from('categories')
         .insert({
-            wallet_id: walletId,
+            wallet_id: walletIdToUse,
             name: name.trim(),
             type: type
         })

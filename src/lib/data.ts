@@ -373,6 +373,7 @@ export async function getTransaction(transactionId: string) {
         .from('transactions')
         .select(`
             id,
+            wallet_id,
             amount,
             description,
             date,
@@ -390,6 +391,7 @@ export async function getTransaction(transactionId: string) {
     
     return {
         id: data.id,
+        wallet_id: data.wallet_id as string,
         amount: Number(data.amount),
         description: data.description,
         date: data.date,

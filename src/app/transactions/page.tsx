@@ -1,4 +1,4 @@
-import { getActiveWallet, getTransactions, getCategories } from "@/lib/data"
+import { getActiveWallet, getWallets, getTransactions, getCategories } from "@/lib/data"
 import { formatCurrency } from "@/lib/utils"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Plus, CreditCard } from "lucide-react"
 import { TransactionActions } from "@/components/transactions/TransactionActions"
 import { TransactionFilters } from "@/components/transactions/TransactionFilters"
+import { WalletSwitcher } from "@/components/wallet/WalletSwitcher"
 import { ImportDialog } from "@/components/import/ImportDialog"
 import { ExportMenu } from "@/components/export/ExportMenu"
 import {
@@ -48,22 +49,30 @@ export default async function TransactionsPage({
         sortOrder: (searchParams?.sortOrder as 'asc' | 'desc') || 'desc',
     }
 
-    const [transactions, categories, allTransactions] = await Promise.all([
+    const [wallets, transactions, categories, allTransactions] = await Promise.all([
+        getWallets(),
         getTransactions(wallet.id, 100, 0, filters),
         getCategories(wallet.id),
         getTransactions(wallet.id, 10000, 0)
     ])
 
+    const walletOptions = wallets.map((w) => ({ id: w.id, name: w.name, currency: w.currency }))
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
                         Transaksi
                     </h1>
-                    <p className="text-slate-600 dark:text-slate-400 mt-2">Kelola semua transaksi keuangan Anda</p>
+                    <p className="text-slate-600 dark:text-slate-400 mt-2">
+                        Kelola semua transaksi keuangan Anda {wallet.name && <span className="font-medium text-slate-600 dark:text-slate-300">· {wallet.name}</span>}
+                    </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                    {walletOptions.length > 1 && (
+                        <WalletSwitcher wallets={walletOptions} activeWalletId={wallet.id} />
+                    )}
                     <ImportDialog walletId={wallet.id} />
                     <ExportMenu
                         transactions={transactions}
