@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, CreditCard, FileText, LogOut, Tags, Wallet, Settings } from "lucide-react"
+import { Home, CreditCard, FileText, BarChart3, LogOut, Tags, Wallet, Settings } from "lucide-react"
 import { logout } from "@/app/login/actions"
 import { ThemeToggle } from "@/components/ThemeToggle"
 
@@ -11,6 +11,7 @@ const navItems = [
     { name: "Transaksi", href: "/transactions", icon: CreditCard },
     { name: "Kategori", href: "/categories", icon: Tags },
     { name: "Laporan", href: "/reports", icon: FileText },
+    { name: "Laporan Periode", href: "/reports/period", icon: BarChart3 },
     { name: "Dompet", href: "/wallets", icon: Wallet },
     { name: "Pengaturan", href: "/settings", icon: Settings },
 ]

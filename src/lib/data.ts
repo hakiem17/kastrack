@@ -1,6 +1,6 @@
 import { createClient } from './supabase/server'
 import { cookies } from 'next/headers'
-import { startOfMonth, endOfMonth, format, subMonths } from 'date-fns'
+import { startOfMonth, endOfMonth, startOfYear, endOfDay, addDays, format, subMonths, subYears } from 'date-fns'
 
 export interface Transaction {
     id: string
@@ -201,10 +201,19 @@ export async function getWalletSummaries(): Promise<WalletSummary[]> {
     }))
 }
 
-export async function getDashboardStats(walletId: string) {
+export interface DashboardStatsParams {
+    month?: number  // 1-12
+    year?: number
+}
+
+export async function getDashboardStats(walletId: string, params?: DashboardStatsParams) {
     const supabase = await createClient()
-    const start = startOfMonth(new Date()).toISOString()
-    const end = endOfMonth(new Date()).toISOString()
+    const now = new Date()
+    const year = params?.year ?? now.getFullYear()
+    const month = params?.month ?? now.getMonth() + 1
+    const refDate = new Date(year, month - 1, 1)
+    const start = startOfMonth(refDate).toISOString()
+    const end = endOfMonth(refDate).toISOString()
 
     const [{ data: transactions }, { data: allTx }] = await Promise.all([
         supabase
@@ -222,6 +231,7 @@ export async function getDashboardStats(walletId: string) {
     let income = 0
     let expense = 0
 
+    // Total Pemasukan/Pengeluaran bulan ini: hanya transaksi yang punya kategori income/expense
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transactions?.forEach((tx: any) => {
         const amount = Number(tx.amount)
@@ -230,6 +240,7 @@ export async function getDashboardStats(walletId: string) {
         } else if (tx.categories?.type === 'expense') {
             expense += amount
         }
+        // Transaksi tanpa kategori (kategori dihapus) tidak masuk ke total bulan ini
     })
 
     let totalBalance = 0
@@ -239,6 +250,8 @@ export async function getDashboardStats(walletId: string) {
         if (tx.categories?.type === 'income') {
             totalBalance += amount
         } else if (tx.categories?.type === 'expense') {
+            totalBalance -= amount
+        } else {
             totalBalance -= amount
         }
     })
@@ -399,20 +412,29 @@ export async function getTransaction(transactionId: string) {
     }
 }
 
-export async function getMonthlyReport(walletId: string) {
-    const supabase = await createClient()
-    const today = new Date()
-    const startDate = startOfMonth(subMonths(today, 5))
-    const endDate = endOfMonth(today)
+export interface MonthlyReportParams {
+    month?: number  // 1-12, bulan terakhir yang ditampilkan
+    year?: number
+}
 
-    const monthSlots = Array.from({ length: 6 }, (_, i) => {
-        const date = subMonths(today, i)
+/** 12 bulan: dari (endMonth - 11) sampai endMonth. */
+export async function getMonthlyReport(walletId: string, params?: MonthlyReportParams) {
+    const supabase = await createClient()
+    const now = new Date()
+    const endYear = params?.year ?? now.getFullYear()
+    const endMonth = params?.month ?? now.getMonth() + 1
+    const endDate = new Date(endYear, endMonth - 1, 1)
+    const startDate = startOfMonth(subMonths(endDate, 11))
+    const rangeEnd = endOfMonth(endDate)
+
+    const monthSlots = Array.from({ length: 12 }, (_, i) => {
+        const date = subMonths(endDate, 11 - i)
         const key = format(date, 'yyyy-MM')
         return {
             key,
             label: format(date, 'MMM yyyy'),
         }
-    }).reverse()
+    })
 
     const monthMap = new Map<string, { Income: number; Expense: number }>()
     monthSlots.forEach((slot) => monthMap.set(slot.key, { Income: 0, Expense: 0 }))
@@ -422,7 +444,7 @@ export async function getMonthlyReport(walletId: string) {
         .select('amount, date, categories(type)')
         .eq('wallet_id', walletId)
         .gte('date', startDate.toISOString())
-        .lte('date', endDate.toISOString())
+        .lte('date', rangeEnd.toISOString())
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data?.forEach((tx: any) => {
@@ -440,6 +462,166 @@ export async function getMonthlyReport(walletId: string) {
         Income: monthMap.get(slot.key)?.Income || 0,
         Expense: monthMap.get(slot.key)?.Expense || 0,
     }))
+}
+
+/**
+ * Jumlah pemasukan & pengeluaran untuk rentang tanggal.
+ * endIsoExclusive: jika true, endIso adalah batas eksklusif (tanggal besok) agar seluruh hari terakhir ikut.
+ */
+async function getIncomeExpenseInRange(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    walletId: string,
+    startIso: string,
+    endIso: string,
+    endIsoExclusive?: boolean
+): Promise<{ income: number; expense: number }> {
+    const query = supabase
+        .from('transactions')
+        .select('amount, categories(type)')
+        .eq('wallet_id', walletId)
+        .gte('date', startIso)
+    const { data } = endIsoExclusive
+        ? await query.lt('date', endIso)
+        : await query.lte('date', endIso)
+    let income = 0
+    let expense = 0
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data?.forEach((tx: any) => {
+        const amount = Number(tx.amount)
+        if (tx.categories?.type === 'income') income += amount
+        else if (tx.categories?.type === 'expense') expense += amount
+    })
+    return { income, expense }
+}
+
+export type PeriodReportType = 'mtd' | 'ytd' | 'yoy' | 'ttm'
+
+export interface PeriodReportResult {
+    type: PeriodReportType
+    label: string
+    description: string
+    periodStart: string
+    periodEnd: string
+    income: number
+    expense: number
+    net: number
+    /** Hanya untuk YoY: perbandingan dengan periode sama tahun lalu. */
+    previous?: { label: string; income: number; expense: number; net: number }
+    growthIncomePercent?: number
+    growthExpensePercent?: number
+    /** Hanya untuk TTM: breakdown per bulan (12 bulan). */
+    monthlyData?: { name: string; Income: number; Expense: number }[]
+}
+
+/**
+ * Laporan periode: MTD, YTD, YoY, TTM.
+ * refDate = tanggal acuan (default: hari ini).
+ */
+export async function getPeriodReport(
+    walletId: string,
+    type: PeriodReportType,
+    refDate: Date = new Date()
+): Promise<PeriodReportResult> {
+    const supabase = await createClient()
+    const today = refDate
+
+    if (type === 'mtd') {
+        const start = startOfMonth(today)
+        const end = endOfDay(today)
+        const startStr = format(start, 'yyyy-MM-dd')
+        const endExclusiveStr = format(addDays(today, 1), 'yyyy-MM-dd')
+        const { income, expense } = await getIncomeExpenseInRange(
+            supabase, walletId, startStr, endExclusiveStr, true
+        )
+        return {
+            type: 'mtd',
+            label: 'Month-to-Date (MTD)',
+            description: 'Dari awal bulan ini hingga hari ini',
+            periodStart: format(start, 'dd MMM yyyy'),
+            periodEnd: format(end, 'dd MMM yyyy'),
+            income,
+            expense,
+            net: income - expense,
+        }
+    }
+
+    if (type === 'ytd') {
+        const start = startOfYear(today)
+        const end = endOfDay(today)
+        const startStr = format(start, 'yyyy-MM-dd')
+        const endExclusiveStr = format(addDays(today, 1), 'yyyy-MM-dd')
+        const { income, expense } = await getIncomeExpenseInRange(
+            supabase, walletId, startStr, endExclusiveStr, true
+        )
+        return {
+            type: 'ytd',
+            label: 'Year-to-Date (YTD)',
+            description: 'Dari 1 Januari hingga hari ini',
+            periodStart: format(start, 'dd MMM yyyy'),
+            periodEnd: format(end, 'dd MMM yyyy'),
+            income,
+            expense,
+            net: income - expense,
+        }
+    }
+
+    if (type === 'yoy') {
+        const currentStart = startOfMonth(today)
+        const currentEnd = endOfMonth(today)
+        const previousStart = startOfMonth(subYears(today, 1))
+        const previousEnd = endOfMonth(subYears(today, 1))
+        const [current, previous] = await Promise.all([
+            getIncomeExpenseInRange(supabase, walletId, currentStart.toISOString(), currentEnd.toISOString()),
+            getIncomeExpenseInRange(supabase, walletId, previousStart.toISOString(), previousEnd.toISOString()),
+        ])
+        const netCurrent = current.income - current.expense
+        const netPrevious = previous.income - previous.expense
+        const growthIncomePercent = previous.income
+            ? ((current.income - previous.income) / previous.income) * 100
+            : (current.income ? 100 : 0)
+        const growthExpensePercent = previous.expense
+            ? ((current.expense - previous.expense) / previous.expense) * 100
+            : (current.expense ? 100 : 0)
+        return {
+            type: 'yoy',
+            label: 'Year-over-Year (YoY)',
+            description: 'Bulan ini vs bulan yang sama tahun lalu',
+            periodStart: format(currentStart, 'MMM yyyy'),
+            periodEnd: format(currentEnd, 'MMM yyyy'),
+            income: current.income,
+            expense: current.expense,
+            net: netCurrent,
+            previous: {
+                label: format(previousStart, 'MMM yyyy'),
+                income: previous.income,
+                expense: previous.expense,
+                net: netPrevious,
+            },
+            growthIncomePercent,
+            growthExpensePercent,
+        }
+    }
+
+    // TTM
+    const monthly = await getMonthlyReport(walletId, {
+        month: today.getMonth() + 1,
+        year: today.getFullYear(),
+    })
+    const income = monthly.reduce((s, r) => s + r.Income, 0)
+    const expense = monthly.reduce((s, r) => s + r.Expense, 0)
+    const ttmStart = startOfMonth(subMonths(today, 11))
+    const ttmEnd = endOfMonth(today)
+    return {
+        type: 'ttm',
+        label: 'Trailing Twelve Months (TTM)',
+        description: 'Ringkasan 12 bulan terakhir',
+        periodStart: format(ttmStart, 'MMM yyyy'),
+        periodEnd: format(ttmEnd, 'MMM yyyy'),
+        income,
+        expense,
+        net: income - expense,
+        monthlyData: monthly,
+    }
 }
 
 export interface CategoryBreakdown {

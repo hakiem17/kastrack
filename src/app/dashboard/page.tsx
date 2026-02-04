@@ -1,21 +1,40 @@
 import { getActiveWallet, getDashboardStats, getMonthlyReport } from "@/lib/data"
 import { OverviewChart } from "@/components/dashboard/OverviewChart"
+import { DashboardMonthFilter } from "@/components/dashboard/DashboardMonthFilter"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import { CreateWalletForm } from "@/components/wallet/CreateWalletForm"
 
-export default async function DashboardPage() {
+const MONTH_NAMES = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+]
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined }
+}) {
   const wallet = await getActiveWallet()
 
-  // If no wallet logic (simplified: if no active wallet member, show onboarding)
   if (!wallet) {
     return <CreateWalletForm />
   }
 
+  const now = new Date()
+  const monthParam = searchParams?.month
+  const yearParam = searchParams?.year
+  const month = monthParam ? parseInt(String(monthParam), 10) : now.getMonth() + 1
+  const year = yearParam ? parseInt(String(yearParam), 10) : now.getFullYear()
+  const validMonth = month >= 1 && month <= 12 ? month : now.getMonth() + 1
+  const validYear = year >= 2000 && year <= 2100 ? year : now.getFullYear()
+
   const [stats, monthlyData] = await Promise.all([
-    getDashboardStats(wallet.id),
-    getMonthlyReport(wallet.id)
+    getDashboardStats(wallet.id, { month: validMonth, year: validYear }),
+    getMonthlyReport(wallet.id, { month: validMonth, year: validYear }),
   ])
+
+  const periodLabel = `${MONTH_NAMES[validMonth - 1]} ${validYear}`
 
   return (
     <div className="space-y-8">
@@ -56,7 +75,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">+{formatCurrency(stats.monthIncome)}</div>
-            <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 mt-2">Bulan ini</p>
+            <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 mt-2">{periodLabel}</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-lg bg-gradient-to-br from-rose-50 via-white to-orange-50 dark:from-rose-950/30 dark:via-slate-900 dark:to-orange-950/30 hover:shadow-xl transition-shadow duration-300">
@@ -70,16 +89,19 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-rose-600 dark:text-rose-400">-{formatCurrency(stats.monthExpense)}</div>
-            <p className="text-xs text-rose-600/70 dark:text-rose-400/70 mt-2">Bulan ini</p>
+            <p className="text-xs text-rose-600/70 dark:text-rose-400/70 mt-2">{periodLabel}</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4 border-0 shadow-lg bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl font-bold">Overview Keuangan</CardTitle>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Tren 6 bulan terakhir</p>
+          <CardHeader className="pb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="text-xl font-bold">Overview Keuangan</CardTitle>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Tren 12 bulan sampai {periodLabel}</p>
+            </div>
+            <DashboardMonthFilter currentMonth={validMonth} currentYear={validYear} />
           </CardHeader>
           <CardContent className="pl-2">
             <OverviewChart data={monthlyData} />

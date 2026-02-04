@@ -109,12 +109,13 @@ export async function setActiveWallet(formData: FormData) {
     revalidatePath('/transactions')
     revalidatePath('/categories')
     revalidatePath('/reports')
+    revalidatePath('/reports/period')
     revalidatePath('/wallets')
 
+    // Return redirectTo agar client bisa full page load (data transaksi/laporan ikut wallet baru, tanpa clear cache)
     if (redirectTo) {
-        redirect(redirectTo)
+        return { success: true, redirectTo }
     }
-
     return { success: true }
 }
 

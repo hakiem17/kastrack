@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import { setActiveWallet } from "@/lib/actions"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -18,8 +18,8 @@ interface WalletSwitcherProps {
 
 export function WalletSwitcher({ wallets, activeWalletId }: WalletSwitcherProps) {
     const pathname = usePathname()
-    const formRef = useRef<HTMLFormElement>(null)
     const [selectedWallet, setSelectedWallet] = useState(activeWalletId || "")
+    const [isSwitching, setIsSwitching] = useState(false)
 
     useEffect(() => {
         setSelectedWallet(activeWalletId || "")
@@ -27,21 +27,36 @@ export function WalletSwitcher({ wallets, activeWalletId }: WalletSwitcherProps)
 
     if (wallets.length === 0) return null
 
-    const handleChange = (value: string) => {
+    const handleChange = async (value: string) => {
+        if (value === activeWalletId) return
         setSelectedWallet(value)
-        const form = formRef.current
-        if (form) {
-            form.requestSubmit()
+        setIsSwitching(true)
+        try {
+            const formData = new FormData()
+            formData.set("walletId", value)
+            formData.set("redirectTo", pathname)
+            const result = await setActiveWallet(formData)
+            if (result && "redirectTo" in result && result.redirectTo) {
+                window.location.href = result.redirectTo
+                return
+            }
+            setSelectedWallet(activeWalletId || "")
+        } catch {
+            setSelectedWallet(activeWalletId || "")
+        } finally {
+            setIsSwitching(false)
         }
     }
 
     return (
-        <form action={setActiveWallet} ref={formRef} className="w-full max-w-xs">
-            <input type="hidden" name="walletId" value={selectedWallet} />
-            <input type="hidden" name="redirectTo" value={pathname} />
-            <Select value={selectedWallet} onValueChange={handleChange}>
+        <div className="w-full max-w-xs">
+            <Select
+                value={selectedWallet}
+                onValueChange={handleChange}
+                disabled={isSwitching}
+            >
                 <SelectTrigger className="h-11 border-2 focus:border-blue-500 transition-colors">
-                    <SelectValue placeholder="Pilih dompet" />
+                    <SelectValue placeholder={isSwitching ? "Memuat…" : "Pilih dompet"} />
                 </SelectTrigger>
                 <SelectContent>
                     {wallets.map((wallet) => (
@@ -51,6 +66,6 @@ export function WalletSwitcher({ wallets, activeWalletId }: WalletSwitcherProps)
                     ))}
                 </SelectContent>
             </Select>
-        </form>
+        </div>
     )
 }

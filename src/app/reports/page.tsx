@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { getActiveWallet, getMonthlyReport, getCategoryBreakdown, getCategoryMonthlyComparison } from "@/lib/data"
 import { ExportButton } from "@/components/reports/ExportButton"
 import { CategoryReport } from "@/components/reports/CategoryReport"
@@ -10,6 +11,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { formatCurrency } from "@/lib/utils"
+import { BarChart3 } from "lucide-react"
 
 export default async function ReportsPage() {
     const wallet = await getActiveWallet()
@@ -26,14 +28,23 @@ export default async function ReportsPage() {
         <div className="space-y-12">
             {/* Monthly Report Section */}
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
                             Laporan Bulanan
                         </h1>
-                        <p className="text-slate-600 dark:text-slate-400 mt-2">Analisis keuangan 6 bulan terakhir</p>
+                        <p className="text-slate-600 dark:text-slate-400 mt-2">Analisis keuangan 12 bulan terakhir</p>
                     </div>
-                    <ExportButton data={data} />
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                            href="/reports/period"
+                            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            <BarChart3 className="h-4 w-4" />
+                            Laporan Periode (MTD, YTD, YoY, TTM)
+                        </Link>
+                        <ExportButton data={data} />
+                    </div>
                 </div>
 
                 <div className="rounded-xl border-0 shadow-lg bg-white dark:bg-slate-900 overflow-hidden">
