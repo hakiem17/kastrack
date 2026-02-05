@@ -1,4 +1,4 @@
-import { getActiveWallet, getDashboardStats, getMonthlyReport } from "@/lib/data"
+import { getActiveWallet, getDashboardStats, getDailyReport } from "@/lib/data"
 import { OverviewChart } from "@/components/dashboard/OverviewChart"
 import { DashboardMonthFilter } from "@/components/dashboard/DashboardMonthFilter"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,9 +29,9 @@ export default async function DashboardPage({
   const validMonth = month >= 1 && month <= 12 ? month : now.getMonth() + 1
   const validYear = year >= 2000 && year <= 2100 ? year : now.getFullYear()
 
-  const [stats, monthlyData] = await Promise.all([
+  const [stats, dailyData] = await Promise.all([
     getDashboardStats(wallet.id, { month: validMonth, year: validYear }),
-    getMonthlyReport(wallet.id, { month: validMonth, year: validYear }),
+    getDailyReport(wallet.id, { month: validMonth, year: validYear }),
   ])
 
   const periodLabel = `${MONTH_NAMES[validMonth - 1]} ${validYear}`
@@ -99,12 +99,12 @@ export default async function DashboardPage({
           <CardHeader className="pb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle className="text-xl font-bold">Overview Keuangan</CardTitle>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Tren 12 bulan sampai {periodLabel}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Tren harian – {periodLabel}</p>
             </div>
             <DashboardMonthFilter currentMonth={validMonth} currentYear={validYear} />
           </CardHeader>
           <CardContent className="pl-2">
-            <OverviewChart data={monthlyData} />
+            <OverviewChart data={dailyData} isDaily />
           </CardContent>
         </Card>
       </div>

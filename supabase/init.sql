@@ -59,6 +59,28 @@ CREATE INDEX IF NOT EXISTS idx_wallet_members_user ON wallet_members(user_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_wallet ON transactions(wallet_id);
 CREATE INDEX IF NOT EXISTS idx_categories_wallet ON categories(wallet_id);
 
+-- 2.5 Transaction Notes (catatan / log transaksi sebelum dimasukkan ke aplikasi)
+CREATE TABLE IF NOT EXISTS transaction_notes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  wallet_id UUID NOT NULL REFERENCES wallets(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  date DATE NOT NULL,
+  amount NUMERIC(15, 2) NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
+  category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
+  description TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_transaction_notes_wallet ON transaction_notes(wallet_id);
+
+-- 2.6 Wallet Notes (satu sticky note per dompet - hanya teks)
+CREATE TABLE IF NOT EXISTS wallet_notes (
+  wallet_id UUID PRIMARY KEY REFERENCES wallets(id) ON DELETE CASCADE,
+  content TEXT DEFAULT '',
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+ALTER TABLE wallet_notes ENABLE ROW LEVEL SECURITY;
+
 -- ============================================================================
 -- 4. ENABLE ROW LEVEL SECURITY (RLS)
 -- ============================================================================
@@ -66,6 +88,7 @@ ALTER TABLE wallets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wallet_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transaction_notes ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
 -- 5. HELPER FUNCTIONS
@@ -190,8 +213,32 @@ CREATE POLICY "Manage transactions if admin or editor" ON transactions
   USING (get_wallet_role(wallet_id) IN ('admin', 'editor'))
   WITH CHECK (get_wallet_role(wallet_id) IN ('admin', 'editor'));
 
+-- 6.5 Transaction Notes Policies (catatan log transaksi)
+DROP POLICY IF EXISTS "View notes of joined wallets" ON transaction_notes;
+CREATE POLICY "View notes of joined wallets" ON transaction_notes
+  FOR SELECT
+  USING (is_wallet_member(wallet_id));
+
+DROP POLICY IF EXISTS "Manage notes if admin or editor" ON transaction_notes;
+CREATE POLICY "Manage notes if admin or editor" ON transaction_notes
+  FOR ALL
+  USING (get_wallet_role(wallet_id) IN ('admin', 'editor'))
+  WITH CHECK (get_wallet_role(wallet_id) IN ('admin', 'editor'));
+
+-- 6.6 Wallet Notes (sticky note per wallet)
+DROP POLICY IF EXISTS "View wallet notes of joined wallets" ON wallet_notes;
+CREATE POLICY "View wallet notes of joined wallets" ON wallet_notes
+  FOR SELECT
+  USING (is_wallet_member(wallet_id));
+
+DROP POLICY IF EXISTS "Manage wallet notes if admin or editor" ON wallet_notes;
+CREATE POLICY "Manage wallet notes if admin or editor" ON wallet_notes
+  FOR ALL
+  USING (get_wallet_role(wallet_id) IN ('admin', 'editor'))
+  WITH CHECK (get_wallet_role(wallet_id) IN ('admin', 'editor'));
+
 -- ============================================================================
--- 2.5 Wallet Invites (untuk Pengaturan / undangan anggota)
+-- 2.7 Wallet Invites (untuk Pengaturan / undangan anggota)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS wallet_invites (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

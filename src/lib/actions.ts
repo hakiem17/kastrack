@@ -110,6 +110,7 @@ export async function setActiveWallet(formData: FormData) {
     revalidatePath('/categories')
     revalidatePath('/reports')
     revalidatePath('/reports/period')
+    revalidatePath('/catatan')
     revalidatePath('/wallets')
 
     // Return redirectTo agar client bisa full page load (data transaksi/laporan ikut wallet baru, tanpa clear cache)
@@ -270,6 +271,34 @@ export async function createTransaction(walletId: string, formData: FormData) {
     revalidatePath('/dashboard')
     revalidatePath('/transactions')
     redirect('/transactions')
+}
+
+// ---------- Catatan (sticky note per dompet, hanya teks) ----------
+
+export async function saveWalletNote(walletId: string, content: string) {
+    const supabase = await createClient()
+    const activeWallet = await getActiveWallet()
+    const walletIdToUse = activeWallet?.id ?? walletId
+
+    const { error } = await supabase
+        .from('wallet_notes')
+        .upsert(
+            { wallet_id: walletIdToUse, content: content ?? '', updated_at: new Date().toISOString() },
+            { onConflict: 'wallet_id' }
+        )
+
+    if (error) {
+        const msg = error.message
+        if (msg.includes('does not exist') || msg.includes('relation')) {
+            return { error: 'Tabel catatan belum ada. Jalankan skrip migrasi wallet_notes di Supabase SQL Editor.' }
+        }
+        if (msg.includes('policy') || msg.includes('permission') || msg.includes('row-level')) {
+            return { error: 'Anda tidak punya akses mengedit catatan (perlu role admin/editor).' }
+        }
+        return { error: msg }
+    }
+    revalidatePath('/catatan')
+    return { success: true }
 }
 
 export async function createCategory(walletId: string, formData: FormData) {

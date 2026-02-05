@@ -1,14 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Home, CreditCard, FileText, BarChart3, LogOut, Tags, Wallet, Settings } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Home, CreditCard, FileText, BarChart3, StickyNote, LogOut, Tags, Wallet, Settings } from "lucide-react"
 import { logout } from "@/app/login/actions"
 import { ThemeToggle } from "@/components/ThemeToggle"
 
 const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Transaksi", href: "/transactions", icon: CreditCard },
+    { name: "Catatan", href: "/catatan", icon: StickyNote },
     { name: "Kategori", href: "/categories", icon: Tags },
     { name: "Laporan", href: "/reports", icon: FileText },
     { name: "Laporan Periode", href: "/reports/period", icon: BarChart3 },
@@ -18,6 +19,10 @@ const navItems = [
 
 export function Navbar() {
     const pathname = usePathname()
+    const router = useRouter()
+
+    // Prefetch on hover agar saat klik, halaman sudah siap (navigasi lebih cepat)
+    const handlePrefetch = (href: string) => () => router.prefetch(href)
 
     // Hide Navbar on login and landing page
     if (pathname === '/login' || pathname === '/' || pathname === '/landing') return null
@@ -40,6 +45,8 @@ export function Navbar() {
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                prefetch={true}
+                                onMouseEnter={handlePrefetch(item.href)}
                                 className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
                                     isActive 
                                         ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30" 
@@ -79,6 +86,9 @@ export function Navbar() {
                         <Link
                             key={item.href}
                             href={item.href}
+                            prefetch={true}
+                            onMouseEnter={handlePrefetch(item.href)}
+                            onTouchStart={handlePrefetch(item.href)}
                             className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-200 ${
                                 isActive 
                                     ? "text-blue-600 dark:text-blue-400" 

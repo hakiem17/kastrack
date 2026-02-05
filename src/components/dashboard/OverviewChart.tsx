@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { BarChart3, TrendingUp } from "lucide-react"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function OverviewChart({ data }: { data: any[] }) {
+export function OverviewChart({ data, isDaily }: { data: any[]; isDaily?: boolean }) {
     const [chartType, setChartType] = useState<'bar' | 'line'>('bar')
 
     // Format untuk YAxis - format singkat untuk chart
@@ -24,9 +24,10 @@ export function OverviewChart({ data }: { data: any[] }) {
     type TooltipPayload = { name?: string; value?: number; color?: string }
     const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: TooltipPayload[]; label?: string }) => {
         if (active && payload && payload.length) {
+            const title = isDaily && label ? `Tanggal ${label}` : label
             return (
                 <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 shadow-lg">
-                    <p className="font-semibold mb-2 text-slate-900 dark:text-slate-100">{label}</p>
+                    <p className="font-semibold mb-2 text-slate-900 dark:text-slate-100">{title}</p>
                     {payload.map((entry: TooltipPayload, index: number) => (
                         <p key={index} className="text-sm" style={{ color: entry.color }}>
                             <span className="font-medium">{entry.name === 'Income' ? 'Pemasukan' : 'Pengeluaran'}:</span>{' '}
@@ -79,6 +80,7 @@ export function OverviewChart({ data }: { data: any[] }) {
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
+                            interval={isDaily ? 4 : 0}
                             className="dark:text-slate-400"
                         />
                         <YAxis
@@ -116,6 +118,7 @@ export function OverviewChart({ data }: { data: any[] }) {
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
+                            interval={isDaily ? 4 : 0}
                             className="dark:text-slate-400"
                         />
                         <YAxis

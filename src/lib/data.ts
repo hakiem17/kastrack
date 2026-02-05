@@ -380,6 +380,63 @@ export async function getCategories(walletId: string) {
     return data || []
 }
 
+/** Satu sticky note per dompet (hanya teks). */
+export async function getWalletNote(walletId: string): Promise<string> {
+    const supabase = await createClient()
+    const { data } = await supabase
+        .from('wallet_notes')
+        .select('content')
+        .eq('wallet_id', walletId)
+        .maybeSingle()
+    return (data?.content as string) ?? ''
+}
+
+export interface TransactionNote {
+    id: string
+    wallet_id: string
+    date: string
+    amount: number
+    type: 'income' | 'expense'
+    category_id: string | null
+    description: string | null
+    created_at: string
+    categories: { name: string; type: string } | null
+}
+
+/** Catatan / log transaksi sebelum dimasukkan ke aplikasi (per wallet). */
+export async function getTransactionNotes(walletId: string): Promise<TransactionNote[]> {
+    const supabase = await createClient()
+    const { data } = await supabase
+        .from('transaction_notes')
+        .select(`
+            id,
+            wallet_id,
+            date,
+            amount,
+            type,
+            category_id,
+            description,
+            created_at,
+            categories ( name, type )
+        `)
+        .eq('wallet_id', walletId)
+        .order('date', { ascending: false })
+        .order('created_at', { ascending: false })
+    if (!data) return []
+    return data.map((row) => ({
+        id: row.id,
+        wallet_id: row.wallet_id,
+        date: row.date,
+        amount: Number(row.amount),
+        type: row.type as 'income' | 'expense',
+        category_id: row.category_id,
+        description: row.description,
+        created_at: row.created_at,
+        // @ts-expect-error - join
+        categories: row.categories ?? null,
+    }))
+}
+
 export async function getTransaction(transactionId: string) {
     const supabase = await createClient()
     const { data, error } = await supabase
@@ -461,6 +518,50 @@ export async function getMonthlyReport(walletId: string, params?: MonthlyReportP
         name: slot.label,
         Income: monthMap.get(slot.key)?.Income || 0,
         Expense: monthMap.get(slot.key)?.Expense || 0,
+    }))
+}
+
+/** Tren harian untuk satu bulan: satu baris per hari (1 s.d. akhir bulan). */
+export async function getDailyReport(
+    walletId: string,
+    params: { month: number; year: number }
+): Promise<{ name: string; Income: number; Expense: number }[]> {
+    const supabase = await createClient()
+    const { month, year } = params
+    const startDate = startOfMonth(new Date(year, month - 1, 1))
+    const endDate = endOfMonth(startDate)
+    const lastDay = endDate.getDate()
+
+    const daySlots = Array.from({ length: lastDay }, (_, i) => {
+        const d = i + 1
+        return { key: String(d), label: String(d) }
+    })
+
+    const dayMap = new Map<string, { Income: number; Expense: number }>()
+    daySlots.forEach((slot) => dayMap.set(slot.key, { Income: 0, Expense: 0 }))
+
+    const { data } = await supabase
+        .from('transactions')
+        .select('amount, date, categories(type)')
+        .eq('wallet_id', walletId)
+        .gte('date', startDate.toISOString())
+        .lte('date', endDate.toISOString())
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data?.forEach((tx: any) => {
+        if (!tx.date || !tx.categories?.type) return
+        const day = format(new Date(tx.date), 'd')
+        const bucket = dayMap.get(day)
+        if (!bucket) return
+        const amount = Number(tx.amount)
+        if (tx.categories.type === 'income') bucket.Income += amount
+        if (tx.categories.type === 'expense') bucket.Expense += amount
+    })
+
+    return daySlots.map((slot) => ({
+        name: slot.label,
+        Income: dayMap.get(slot.key)?.Income || 0,
+        Expense: dayMap.get(slot.key)?.Expense || 0,
     }))
 }
 

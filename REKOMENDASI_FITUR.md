@@ -38,20 +38,19 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ---
 
-### 3. **Grafik Multi-Bulan di Dashboard** ⭐⭐⭐⭐ ✅ **SELESAI**
+### 3. **Dashboard Overview & Filter Bulan** ⭐⭐⭐⭐ ✅ **SELESAI**
 - **Fitur:**
-  - ✅ Grafik tren 6 bulan terakhir
-  - ✅ Perbandingan bulanan
-  - ✅ Line chart untuk melihat trend
-  - ✅ Bar chart untuk perbandingan
-  - ✅ Toggle antara Bar Chart dan Line Chart
-  - ✅ Custom tooltip dengan format Rupiah
-  - ✅ Menampilkan nilai "Bersih" di tooltip
+  - ✅ **Overview Keuangan tren harian** – chart per hari dalam bulan yang dipilih (bukan 12 bulan)
+  - ✅ Filter bulan & tahun di dashboard (dropdown Bulan + Tahun)
+  - ✅ Kartu Pemasukan/Pengeluaran mengikuti bulan yang dipilih
+  - ✅ Line chart & Bar chart dengan toggle
+  - ✅ Custom tooltip (format Rupiah, "Tanggal X" untuk view harian)
+  - ✅ Sumbu X di chart harian dirapikan (interval label agar tidak penuh)
   
-- **Manfaat:** Analisis tren lebih jelas
+- **Manfaat:** Fokus analisis bulan berjalan per hari; ganti bulan tanpa keluar halaman
 - **Effort:** ⭐⭐ (Mudah)
 - **Impact:** ⭐⭐⭐⭐ (Tinggi)
-- **Status:** ✅ **IMPLEMENTED** - File: `src/components/dashboard/OverviewChart.tsx`
+- **Status:** ✅ **IMPLEMENTED** - Files: `src/components/dashboard/OverviewChart.tsx`, `src/components/dashboard/DashboardMonthFilter.tsx`, `src/app/dashboard/page.tsx`, `src/lib/data.ts` (getDashboardStats, getDailyReport, params month/year)
 
 ---
 
@@ -141,10 +140,26 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ---
 
-### 10. **Statistik Lanjutan** ⭐⭐⭐
+### 10. **Laporan Periode (MTD, YTD, YoY, TTM)** ⭐⭐⭐⭐ ✅ **SELESAI**
+- **Fitur:**
+  - ✅ **MTD (Month-to-Date)** – dari awal bulan hingga hari ini
+  - ✅ **YTD (Year-to-Date)** – dari 1 Januari hingga hari ini
+  - ✅ **YoY (Year-over-Year)** – bulan ini vs bulan sama tahun lalu + % pertumbuhan
+  - ✅ **TTM (Trailing Twelve Months)** – ringkasan 12 bulan terakhir + chart tren
+  - ✅ Tab MTD/YTD/YoY/TTM (navigasi via Link, tampilan sesuai periode)
+  - ✅ Menu "Laporan Periode" di sidebar + link dari halaman Laporan
+  
+- **Manfaat:** Analisis periode standar (MTD, YTD, YoY, TTM) tanpa hitung manual
+- **Effort:** ⭐⭐⭐ (Sedang)
+- **Impact:** ⭐⭐⭐⭐ (Tinggi)
+- **Status:** ✅ **IMPLEMENTED** - Files: `src/app/reports/period/page.tsx`, `src/components/reports/PeriodTypeTabs.tsx`, `src/lib/data.ts` (getPeriodReport, getIncomeExpenseInRange), Navbar (Laporan Periode)
+
+---
+
+### 11. **Statistik Lanjutan** ⭐⭐⭐
 - **Fitur:**
   - Rata-rata pengeluaran harian/bulanan
-  - Perbandingan YoY (Year over Year)
+  - Perbandingan YoY (Year over Year) — *sebagian tercakup di Laporan Periode*
   - Prediksi pengeluaran
   - Insight & rekomendasi
   
@@ -156,7 +171,7 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ## 🎨 **PRIORITAS RENDAH** (Nice to Have)
 
-### 11. **Dark Mode Toggle** ⭐⭐ ✅ **SELESAI**
+### 12. **Dark Mode Toggle** ⭐⭐ ✅ **SELESAI**
 - **Fitur:**
   - ✅ Toggle dark/light mode
   - ✅ Simpan preferensi user (localStorage)
@@ -171,7 +186,7 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ---
 
-### 12. **Tag/Label Transaksi** ⭐⭐
+### 13. **Tag/Label Transaksi** ⭐⭐
 - **Fitur:**
   - Multiple tags per transaksi
   - Filter berdasarkan tag
@@ -183,7 +198,7 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ---
 
-### 13. **Foto & Attachment** ⭐⭐
+### 14. **Foto & Attachment** ⭐⭐
 - **Fitur:**
   - Upload foto struk/kwitansi
   - Attachment dokumen
@@ -195,7 +210,7 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ---
 
-### 14. **Goal/Target Keuangan** ⭐⭐
+### 15. **Goal/Target Keuangan** ⭐⭐
 - **Fitur:**
   - Set target tabungan
   - Progress tracking
@@ -207,7 +222,7 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ---
 
-### 15. **Sharing & Kolaborasi** ⭐⭐
+### 16. **Sharing & Kolaborasi** ⭐⭐
 - **Fitur:**
   - Share laporan dengan anggota wallet
   - Komentar pada transaksi
@@ -219,7 +234,7 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ---
 
-### 16. **Mobile App (PWA)** ⭐⭐ ✅ **SELESAI**
+### 17. **Mobile App (PWA)** ⭐⭐ ✅ **SELESAI**
 - **Fitur:**
   - ✅ Progressive Web App (manifest, metadata, theme-color)
   - ✅ Offline support (service worker cache-first untuk repeat visit)
@@ -233,7 +248,7 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ---
 
-### 17. **Integrasi Bank (Opsional)** ⭐
+### 18. **Integrasi Bank (Opsional)** ⭐
 - **Fitur:**
   - Import otomatis dari bank
   - Auto-categorization dengan AI
@@ -245,7 +260,7 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ---
 
-### 18. **Dashboard Widget Customization** ⭐
+### 19. **Dashboard Widget Customization** ⭐
 - **Fitur:**
   - Drag & drop widgets
   - Pilih metrik yang ditampilkan
@@ -262,7 +277,7 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 ### **Fase 1** (1-2 Minggu) - Quick Wins ✅ **SELESAI**
 ✅ Edit & Hapus Transaksi  
 ✅ Filter & Pencarian Transaksi  
-✅ Grafik Multi-Bulan  
+✅ Dashboard Overview (tren harian + filter bulan)  
 ✅ Dark Mode Toggle (Bonus)
 
 **Total Effort:** ⭐⭐ (Mudah)  
@@ -284,6 +299,7 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 ### **Fase 3** (3-4 Minggu) - Advanced Features
 ✅ Multi-Wallet Management (termasuk Pengaturan User, Invite, Set Self Admin)  
 ✅ Export/Import Data  
+✅ Laporan Periode (MTD, YTD, YoY, TTM)  
 ⬜ Statistik Lanjutan  
 
 **Total Effort:** ⭐⭐⭐⭐ (Agak Sulit)  
@@ -293,7 +309,8 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 
 ### **Fase 4** (Opsional) - Nice to Have
 ✅ Mobile App (PWA) — manifest, service worker, install to home screen  
-✅ Fitur-fitur advanced lainnya
+✅ Tampilan iPad (sidebar lg, bottom nav + full width, tabel scroll, safe area)  
+✅ Ganti wallet tanpa clear cache (full page load)
 
 ---
 
@@ -303,7 +320,8 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 |-------|--------|--------|----------|--------|
 | Edit/Hapus Transaksi | ⭐⭐⭐⭐⭐ | ⭐⭐ | **PALING PENTING** | ✅ **SELESAI** |
 | Filter & Pencarian | ⭐⭐⭐⭐⭐ | ⭐⭐ | **PALING PENTING** | ✅ **SELESAI** |
-| Grafik Multi-bulan | ⭐⭐⭐⭐ | ⭐⭐ | **SANGAT PENTING** | ✅ **SELESAI** |
+| Dashboard Overview (harian + filter bulan) | ⭐⭐⭐⭐ | ⭐⭐ | **SANGAT PENTING** | ✅ **SELESAI** |
+| Laporan Periode (MTD, YTD, YoY, TTM) | ⭐⭐⭐⭐ | ⭐⭐⭐ | **SANGAT PENTING** | ✅ **SELESAI** |
 | Dark Mode Toggle | ⭐⭐ | ⭐⭐ | **OPSIONAL** | ✅ **SELESAI** |
 | Budget Management | ⭐⭐⭐⭐ | ⭐⭐⭐ | **SANGAT PENTING** | ⬜ Belum |
 | Recurring Transactions | ⭐⭐⭐⭐ | ⭐⭐⭐ | **PENTING** | ⬜ Belum |
@@ -321,12 +339,14 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 ### **✅ TELAH DIIMPLEMENTASIKAN:**
 1. ✅ **Edit & Hapus Transaksi** - Impact sangat tinggi, effort rendah
 2. ✅ **Filter & Pencarian** (termasuk opsi filter bulan) - Impact sangat tinggi, effort rendah
-3. ✅ **Grafik Multi-Bulan** - Impact tinggi, effort rendah
-4. ✅ **Dark Mode Toggle** - Bonus feature
-5. ✅ **Laporan Kategori** - Breakdown & perbandingan kategori
-6. ✅ **Export/Import Data** - CSV, backup JSON, template import
-7. ✅ **Multi-Wallet Management** - Switch wallet, transfer antar wallet, overview (tanpa duplikat), tambah dompet, tombol Jadikan Aktif; **Pengaturan User:** tambah user baru (popup), pilih wallet+role, daftar user aktif; **Invite wallet** by link; **Set self admin** di Pengaturan; DDL satu file `supabase/init.sql`
-8. ✅ **Mobile App (PWA)** - Manifest, service worker (offline repeat visit), Install to home screen; metadata & viewport di layout
+3. ✅ **Dashboard Overview Keuangan** - Tren **harian** bulan berjalan + filter Bulan/Tahun; Bar/Line chart, tooltip "Tanggal X"
+4. ✅ **Laporan Periode (MTD, YTD, YoY, TTM)** - Menu tersendiri + tab; MTD/YTD/YoY/TTM dengan kartu & (YoY) growth %, (TTM) chart 12 bulan
+5. ✅ **Dark Mode Toggle** - Bonus feature
+6. ✅ **Laporan Kategori** - Breakdown & perbandingan kategori
+7. ✅ **Export/Import Data** - CSV, backup JSON, template import
+8. ✅ **Multi-Wallet Management** - Switch wallet (full page reload agar data ikut wallet), transfer antar wallet, overview, tambah dompet; **Pengaturan User**, **Invite wallet**, **Set self admin**; DDL satu file `supabase/init.sql`
+9. ✅ **Mobile App (PWA)** - Manifest, service worker, Install to home screen; metadata & viewport di layout
+10. ✅ **Tampilan iPad** - Sidebar hanya dari lg (1024px); iPad portrait pakai bottom nav + full width; tabel overflow-x-auto; safe area (pb-safe)
 
 ### **Selanjutnya (Rekomendasi):**
 1. **Budget Management** - Impact tinggi, effort sedang
@@ -346,12 +366,12 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
 - Prioritas dapat disesuaikan dengan kebutuhan bisnis
 - Effort estimation relatif terhadap kompleksitas kodebase saat ini
 - Impact estimation berdasarkan value untuk end user
-- Update terbaru: PWA diimplementasikan (manifest, service worker, install to home screen, offline cache); Multi-Wallet diperluas dengan Pengaturan User, Invite, Set self admin; DDL digabung ke `supabase/init.sql`
+- Update terbaru: **Dashboard** pakai overview **tren harian** bulan berjalan + filter Bulan/Tahun. **Laporan Periode** (MTD, YTD, YoY, TTM) menu & halaman tersendiri. **Ganti wallet** dengan full page load (tanpa clear cache). **iPad**: sidebar dari lg, bottom nav + full width di tablet portrait, tabel scroll horizontal, safe area.
 
 ---
 
-**Versi:** 1.5  
-**Status:** Updated - PWA (manifest, SW, install), progress fitur diperbarui
+**Versi:** 1.6  
+**Status:** Updated - Dashboard harian + filter bulan; Laporan Periode (MTD/YTD/YoY/TTM); iPad layout; wallet switch full reload
 
 ---
 
@@ -370,10 +390,12 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
    - File: `src/app/transactions/page.tsx` (updated)
    - Features: Filter bulan (opsi month), kategori, tipe, rentang tanggal, sort, URL params
 
-3. ✅ **Grafik Multi-Bulan di Dashboard** - Implemented
-   - File: `src/components/dashboard/OverviewChart.tsx`
-   - File: `src/app/page.tsx` (updated)
-   - Features: Bar Chart, Line Chart, Toggle, Custom Tooltip
+3. ✅ **Dashboard Overview Keuangan (tren harian + filter bulan)** - Implemented
+   - File: `src/components/dashboard/OverviewChart.tsx` (Bar/Line, isDaily, tooltip "Tanggal X")
+   - File: `src/components/dashboard/DashboardMonthFilter.tsx` (Bulan + Tahun dropdown)
+   - File: `src/app/dashboard/page.tsx` (searchParams month/year, getDailyReport)
+   - File: `src/lib/data.ts` (getDashboardStats, getDailyReport dengan params month/year)
+   - Features: Tren harian bulan yang dipilih, filter Bulan/Tahun, Bar/Line chart, custom tooltip
 
 4. ✅ **Dark Mode Toggle** - Implemented
    - File: `src/components/ThemeProvider.tsx`
@@ -415,11 +437,27 @@ Dokumen ini berisi rekomendasi fitur untuk meningkatkan aplikasi KasTrack berdas
    - Filter transaksi bisa pilih bulan → auto set Dari/Sampai Tanggal
 
 9. ✅ **Mobile App (PWA)** - Implemented
-   - File: `public/manifest.json` (nama, start_url, display standalone, theme_color, icons)
-   - File: `public/sw.js` (service worker cache-first untuk GET same-origin)
-   - File: `src/components/pwa/RegisterSW.tsx` (registrasi service worker)
-   - File: `src/app/layout.tsx` (metadata manifest, viewport themeColor, appleWebApp, icons.apple)
+   - File: `public/manifest.json`, `public/sw.js`, `src/components/pwa/RegisterSW.tsx`, `src/app/layout.tsx`
    - Features: Install to home screen, offline support (repeat visit), PWA metadata
+
+10. ✅ **Laporan Periode (MTD, YTD, YoY, TTM)** - Implemented
+    - File: `src/app/reports/period/page.tsx` (halaman Laporan Periode)
+    - File: `src/components/reports/PeriodTypeTabs.tsx` (tab MTD/YTD/YoY/TTM via Link)
+    - File: `src/lib/data.ts` (getPeriodReport, getIncomeExpenseInRange)
+    - Navbar: menu "Laporan Periode"; Reports page: link ke Laporan Periode
+    - Features: MTD, YTD, YoY (dengan growth %), TTM (dengan chart 12 bulan); navigasi tab
+
+11. ✅ **Ganti wallet tanpa clear cache** (UX) - Implemented
+    - File: `src/lib/actions.ts` (setActiveWallet mengembalikan redirectTo, tidak redirect())
+    - File: `src/components/wallet/WalletSwitcher.tsx` (panggil action lalu window.location.href = redirectTo)
+    - Full page load setelah ganti wallet agar transaksi/laporan ikut wallet baru
+
+12. ✅ **Tampilan iPad** - Implemented
+    - File: `src/components/ConditionalLayout.tsx` (lg:ml-64, lg:p-8, pb-24)
+    - File: `src/components/Navbar.tsx` (sidebar lg:flex, bottom nav lg:hidden; min-h nav)
+    - File: `src/app/transactions/page.tsx`, `src/app/reports/page.tsx` (overflow-x-auto tabel)
+    - File: `src/app/globals.css` (.pb-safe untuk safe-area-inset-bottom)
+    - Features: Sidebar hanya ≥1024px; iPad portrait pakai bottom nav + full width; tabel scroll horizontal
 
 ### ⬜ **FITUR YANG BELUM DIIMPLEMENTASIKAN**
 
