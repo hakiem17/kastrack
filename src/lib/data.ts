@@ -470,28 +470,49 @@ export async function getTransaction(transactionId: string) {
 }
 
 export interface MonthlyReportParams {
-    month?: number  // 1-12, bulan terakhir yang ditampilkan
+    month?: number  // 1-12, bulan terakhir yang ditampilkan (untuk mode rolling)
     year?: number
+    /** true = 12 bulan dalam satu tahun (Jan–Des), tidak digabung antar tahun */
+    yearOnly?: boolean
 }
 
-/** 12 bulan: dari (endMonth - 11) sampai endMonth. */
+/** 12 bulan: yearOnly=true → Jan–Des tahun yang dipilih; else rolling 12 bulan dari (endMonth-11) s.d. endMonth. */
 export async function getMonthlyReport(walletId: string, params?: MonthlyReportParams) {
     const supabase = await createClient()
     const now = new Date()
     const endYear = params?.year ?? now.getFullYear()
     const endMonth = params?.month ?? now.getMonth() + 1
     const endDate = new Date(endYear, endMonth - 1, 1)
-    const startDate = startOfMonth(subMonths(endDate, 11))
-    const rangeEnd = endOfMonth(endDate)
 
-    const monthSlots = Array.from({ length: 12 }, (_, i) => {
-        const date = subMonths(endDate, 11 - i)
-        const key = format(date, 'yyyy-MM')
-        return {
-            key,
-            label: format(date, 'MMM yyyy'),
-        }
-    })
+    let startDate: Date
+    let rangeEnd: Date
+    let monthSlots: { key: string; label: string }[]
+
+    if (params?.yearOnly && params?.year != null) {
+        // Satu tahun penuh (Jan–Des), tidak digabung dengan tahun lain
+        const y = params.year
+        startDate = new Date(y, 0, 1)
+        rangeEnd = endOfMonth(new Date(y, 11, 1))
+        monthSlots = Array.from({ length: 12 }, (_, i) => {
+            const date = new Date(y, i, 1)
+            return {
+                key: format(date, 'yyyy-MM'),
+                label: format(date, 'MMM yyyy'),
+            }
+        })
+    } else {
+        // Rolling 12 bulan (untuk TTM dll)
+        startDate = startOfMonth(subMonths(endDate, 11))
+        rangeEnd = endOfMonth(endDate)
+        monthSlots = Array.from({ length: 12 }, (_, i) => {
+            const date = subMonths(endDate, 11 - i)
+            const key = format(date, 'yyyy-MM')
+            return {
+                key,
+                label: format(date, 'MMM yyyy'),
+            }
+        })
+    }
 
     const monthMap = new Map<string, { Income: number; Expense: number }>()
     monthSlots.forEach((slot) => monthMap.set(slot.key, { Income: 0, Expense: 0 }))

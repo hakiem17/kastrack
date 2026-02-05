@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { getActiveWallet, getMonthlyReport, getCategoryBreakdown, getCategoryMonthlyComparison } from "@/lib/data"
 import { ExportButton } from "@/components/reports/ExportButton"
+import { ReportsYearFilter } from "@/components/reports/ReportsYearFilter"
 import { CategoryReport } from "@/components/reports/CategoryReport"
 import {
     Table,
@@ -13,12 +14,21 @@ import {
 import { formatCurrency } from "@/lib/utils"
 import { BarChart3 } from "lucide-react"
 
-export default async function ReportsPage() {
+export default async function ReportsPage({
+    searchParams,
+}: {
+    searchParams?: { [key: string]: string | string[] | undefined }
+}) {
     const wallet = await getActiveWallet()
 
     if (!wallet) return <div>Dompet tidak ditemukan</div>
 
-    const data = await getMonthlyReport(wallet.id)
+    const now = new Date()
+    const yearParam = searchParams?.year
+    const selectedYear = yearParam ? parseInt(String(yearParam), 10) : now.getFullYear()
+    const validYear = selectedYear >= 2000 && selectedYear <= 2100 ? selectedYear : now.getFullYear()
+
+    const data = await getMonthlyReport(wallet.id, { year: validYear, yearOnly: true })
     const incomeBreakdown = await getCategoryBreakdown(wallet.id, 'income')
     const expenseBreakdown = await getCategoryBreakdown(wallet.id, 'expense')
     const incomeMonthlyComparison = await getCategoryMonthlyComparison(wallet.id, 'income', 6)
@@ -33,9 +43,10 @@ export default async function ReportsPage() {
                         <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
                             Laporan Bulanan
                         </h1>
-                        <p className="text-slate-600 dark:text-slate-400 mt-2">Analisis keuangan 12 bulan terakhir</p>
+                        <p className="text-slate-600 dark:text-slate-400 mt-2">Analisis keuangan per tahun (Jan–Des)</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
+                        <ReportsYearFilter currentYear={validYear} />
                         <Link
                             href="/reports/period"
                             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
