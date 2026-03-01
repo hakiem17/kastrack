@@ -9,12 +9,11 @@ import { SettingsSetAdminAllButton } from "@/components/settings/SettingsSetAdmi
 import { SettingsUserList } from "@/components/settings/SettingsUserList"
 
 export default async function SettingsPage() {
-    const supabase = await createClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
-
-    const walletsWithRole = await getWalletsWithRole()
+    const [authResult, walletsWithRole] = await Promise.all([
+        createClient().then((c) => c.auth.getUser()),
+        getWalletsWithRole(),
+    ])
+    const user = authResult.data.user
     const adminWallets = walletsWithRole.filter((w) => w.role === "admin")
 
     if (adminWallets.length === 0) {

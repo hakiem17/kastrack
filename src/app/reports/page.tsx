@@ -2,6 +2,7 @@ import Link from "next/link"
 import { getActiveWallet, getMonthlyReport, getCategoryBreakdown, getCategoryMonthlyComparison } from "@/lib/data"
 import { ExportButton } from "@/components/reports/ExportButton"
 import { ReportsYearFilter } from "@/components/reports/ReportsYearFilter"
+import { ReportsMonthFilter } from "@/components/reports/ReportsMonthFilter"
 import { CategoryReport } from "@/components/reports/CategoryReport"
 import {
     Table,
@@ -13,26 +14,51 @@ import {
 } from "@/components/ui/table"
 import { formatCurrency } from "@/lib/utils"
 import { BarChart3 } from "lucide-react"
+import { startOfMonth, endOfMonth } from "date-fns"
+
+export const dynamic = 'force-dynamic'
 
 export default async function ReportsPage({
     searchParams,
 }: {
-    searchParams?: { [key: string]: string | string[] | undefined }
+    searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
     const wallet = await getActiveWallet()
 
     if (!wallet) return <div>Dompet tidak ditemukan</div>
 
+    const params = await searchParams
     const now = new Date()
-    const yearParam = searchParams?.year
+    const yearParam = params?.year
+    const monthParam = params?.month
     const selectedYear = yearParam ? parseInt(String(yearParam), 10) : now.getFullYear()
     const validYear = selectedYear >= 2000 && selectedYear <= 2100 ? selectedYear : now.getFullYear()
 
-    const data = await getMonthlyReport(wallet.id, { year: validYear, yearOnly: true })
-    const incomeBreakdown = await getCategoryBreakdown(wallet.id, 'income')
-    const expenseBreakdown = await getCategoryBreakdown(wallet.id, 'expense')
-    const incomeMonthlyComparison = await getCategoryMonthlyComparison(wallet.id, 'income', 6)
-    const expenseMonthlyComparison = await getCategoryMonthlyComparison(wallet.id, 'expense', 6)
+    const selectedMonth = monthParam ? parseInt(String(monthParam), 10) : 0
+    const validMonth = selectedMonth >= 1 && selectedMonth <= 12 ? selectedMonth : 0
+
+    // Build date range for category breakdown filter
+    let categoryStartDate: string | undefined
+    let categoryEndDate: string | undefined
+
+    if (validMonth > 0) {
+        // Filter by specific month
+        const refDate = new Date(validYear, validMonth - 1, 1)
+        categoryStartDate = startOfMonth(refDate).toISOString()
+        categoryEndDate = endOfMonth(refDate).toISOString()
+    } else {
+        // Filter by full year
+        categoryStartDate = new Date(validYear, 0, 1).toISOString()
+        categoryEndDate = new Date(validYear, 11, 31, 23, 59, 59, 999).toISOString()
+    }
+
+    const [data, incomeBreakdown, expenseBreakdown, incomeMonthlyComparison, expenseMonthlyComparison] = await Promise.all([
+        getMonthlyReport(wallet.id, { year: validYear, yearOnly: true }),
+        getCategoryBreakdown(wallet.id, 'income', categoryStartDate, categoryEndDate),
+        getCategoryBreakdown(wallet.id, 'expense', categoryStartDate, categoryEndDate),
+        getCategoryMonthlyComparison(wallet.id, 'income', 6),
+        getCategoryMonthlyComparison(wallet.id, 'expense', 6),
+    ])
 
     return (
         <div className="space-y-12">
@@ -89,13 +115,25 @@ export default async function ReportsPage({
 
             {/* Category Report Section */}
             <div className="border-t border-slate-200 dark:border-slate-800 pt-8">
+                <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                        Filter grafik kategori:
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <ReportsYearFilter currentYear={validYear} />
+                        <ReportsMonthFilter currentMonth={validMonth} />
+                    </div>
+                </div>
                 <CategoryReport
                     incomeBreakdown={incomeBreakdown}
                     expenseBreakdown={expenseBreakdown}
                     incomeMonthlyComparison={incomeMonthlyComparison}
                     expenseMonthlyComparison={expenseMonthlyComparison}
+                    selectedYear={validYear}
+                    selectedMonth={validMonth}
                 />
             </div>
         </div>
     )
 }
+

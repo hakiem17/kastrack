@@ -1,6 +1,6 @@
 import { getActiveWallet, getPeriodReport, type PeriodReportType, type PeriodReportResult } from "@/lib/data"
+import { OverviewChartDynamic } from "@/components/dashboard/OverviewChartDynamic"
 import { PeriodTypeTabs } from "@/components/reports/PeriodTypeTabs"
-import { OverviewChart } from "@/components/dashboard/OverviewChart"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
@@ -92,7 +92,7 @@ export default async function ReportsPeriodPage({
                             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
                                 Tren 12 bulan (TTM)
                             </h3>
-                            <OverviewChart data={report.monthlyData} />
+                            <OverviewChartDynamic data={report.monthlyData} />
                         </div>
                     )}
                 </CardContent>

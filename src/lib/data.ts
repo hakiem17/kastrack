@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { createClient } from './supabase/server'
 import { cookies } from 'next/headers'
 import { startOfMonth, endOfMonth, startOfYear, endOfDay, addDays, format, subMonths, subYears } from 'date-fns'
@@ -21,7 +22,7 @@ export interface WalletSummary {
     totalBalance: number
 }
 
-export async function getActiveWallet() {
+export const getActiveWallet = cache(async function getActiveWallet() {
     const supabase = await createClient()
     const cookieStore = await cookies()
     const activeWalletId = cookieStore.get('active_wallet_id')?.value
@@ -49,7 +50,7 @@ export async function getActiveWallet() {
     // @ts-expect-error - Supabase types join inference
     const wallet = memberData.wallets as { id: string; name: string; currency: string }
     return wallet
-}
+})
 
 /** Daftar wallet yang **Anda** ikuti (satu baris per wallet, tanpa duplikat). */
 export async function getWallets() {

@@ -1,6 +1,6 @@
 import { getActiveWallet, getDashboardStats, getDailyReport } from "@/lib/data"
-import { OverviewChart } from "@/components/dashboard/OverviewChart"
 import { DashboardMonthFilter } from "@/components/dashboard/DashboardMonthFilter"
+import { OverviewChartDynamic } from "@/components/dashboard/OverviewChartDynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import { CreateWalletForm } from "@/components/wallet/CreateWalletForm"
@@ -13,7 +13,7 @@ const MONTH_NAMES = [
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined }
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const wallet = await getActiveWallet()
 
@@ -21,9 +21,10 @@ export default async function DashboardPage({
     return <CreateWalletForm />
   }
 
+  const params = await searchParams
   const now = new Date()
-  const monthParam = searchParams?.month
-  const yearParam = searchParams?.year
+  const monthParam = params?.month
+  const yearParam = params?.year
   const month = monthParam ? parseInt(String(monthParam), 10) : now.getMonth() + 1
   const year = yearParam ? parseInt(String(yearParam), 10) : now.getFullYear()
   const validMonth = month >= 1 && month <= 12 ? month : now.getMonth() + 1
@@ -104,7 +105,7 @@ export default async function DashboardPage({
             <DashboardMonthFilter currentMonth={validMonth} currentYear={validYear} />
           </CardHeader>
           <CardContent className="pl-2">
-            <OverviewChart data={dailyData} isDaily />
+            <OverviewChartDynamic data={dailyData} isDaily />
           </CardContent>
         </Card>
       </div>

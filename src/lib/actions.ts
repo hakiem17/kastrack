@@ -277,13 +277,12 @@ export async function createTransaction(walletId: string, formData: FormData) {
 
 export async function saveWalletNote(walletId: string, content: string) {
     const supabase = await createClient()
-    const activeWallet = await getActiveWallet()
-    const walletIdToUse = activeWallet?.id ?? walletId
-
+    // Selalu pakai walletId dari halaman (dompet yang sedang dilihat). Jangan panggil getActiveWallet()
+    // agar wallet aktif tidak berubah setelah simpan (cookie/konteks di server action bisa berbeda).
     const { error } = await supabase
         .from('wallet_notes')
         .upsert(
-            { wallet_id: walletIdToUse, content: content ?? '', updated_at: new Date().toISOString() },
+            { wallet_id: walletId, content: content ?? '', updated_at: new Date().toISOString() },
             { onConflict: 'wallet_id' }
         )
 

@@ -1,9 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     typescript: {
-      // Mengabaikan error TypeScript agar build tidak berhenti
-      ignoreBuildErrors: true,
+        ignoreBuildErrors: true,
     },
-  };
-  
-  export default nextConfig;
+    experimental: {
+        optimizePackageImports: ['lucide-react', 'recharts'],
+    },
+};
+
+export default nextConfig;

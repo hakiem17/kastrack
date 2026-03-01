@@ -22,7 +22,10 @@ export function ReportsYearFilter({ currentYear }: { currentYear: number }) {
     const handleYearChange = (value: string) => {
         const next = new URLSearchParams(searchParams.toString())
         next.set("year", value)
+        // Reset month when year changes so user starts fresh each year
+        next.delete("month")
         router.push(`/reports?${next.toString()}`)
+        router.refresh()
     }
 
     return (

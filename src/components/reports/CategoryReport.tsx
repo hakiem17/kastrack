@@ -9,11 +9,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CategoryBreakdown, CategoryMonthlyComparison } from "@/lib/data"
 import { TrendingUp, TrendingDown, PieChart as PieChartIcon } from "lucide-react"
 
+const MONTH_NAMES = [
+    '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+]
+
 interface CategoryReportProps {
     incomeBreakdown: CategoryBreakdown[]
     expenseBreakdown: CategoryBreakdown[]
     incomeMonthlyComparison: CategoryMonthlyComparison[]
     expenseMonthlyComparison: CategoryMonthlyComparison[]
+    selectedYear?: number
+    selectedMonth?: number
 }
 
 const COLORS = [
@@ -21,9 +28,13 @@ const COLORS = [
     '#ef4444', '#06b6d4', '#f97316', '#6366f1', '#14b8a6'
 ]
 
-export function CategoryReport({ incomeBreakdown, expenseBreakdown, incomeMonthlyComparison, expenseMonthlyComparison }: CategoryReportProps) {
+export function CategoryReport({ incomeBreakdown, expenseBreakdown, incomeMonthlyComparison, expenseMonthlyComparison, selectedYear, selectedMonth }: CategoryReportProps) {
     const [selectedType, setSelectedType] = useState<'income' | 'expense'>('expense')
     const [viewMode, setViewMode] = useState<'breakdown' | 'comparison'>('breakdown')
+
+    const periodLabel = selectedMonth && selectedMonth > 0
+        ? `${MONTH_NAMES[selectedMonth]} ${selectedYear ?? ''}`
+        : `Semua bulan${selectedYear ? ` ${selectedYear}` : ''}`
 
     const currentBreakdown = selectedType === 'income' ? incomeBreakdown : expenseBreakdown
     const currentComparison = selectedType === 'income' ? incomeMonthlyComparison : expenseMonthlyComparison
@@ -44,7 +55,7 @@ export function CategoryReport({ incomeBreakdown, expenseBreakdown, incomeMonthl
     })
 
     const barChartData = currentComparison.map(month => {
-        const data: Record<string, number> = { month: month.month }
+        const data: Record<string, number | string> = { month: month.month }
         month.categories.forEach(cat => {
             data[cat.categoryName] = cat.total
         })
@@ -55,15 +66,17 @@ export function CategoryReport({ incomeBreakdown, expenseBreakdown, incomeMonthl
     const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayloadItem[] }) => {
         if (active && payload && payload.length) {
             const data = payload[0]
+            const fill = data.payload?.fill
+            const percentage = data.payload?.percentage
             return (
                 <div className="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-lg">
                     <p className="font-semibold text-slate-900 dark:text-slate-100 mb-1">{data.name}</p>
-                    <p className="text-sm font-medium" style={{ color: data.payload.fill || data.color }}>
-                        {formatCurrency(data.value)}
+                    <p className="text-sm font-medium" style={{ color: fill || data.color }}>
+                        {formatCurrency(data.value ?? 0)}
                     </p>
-                    {data.payload.percentage !== undefined && (
+                    {percentage !== undefined && (
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            {data.payload.percentage.toFixed(1)}% dari total
+                            {percentage.toFixed(1)}% dari total
                         </p>
                     )}
                 </div>
@@ -94,7 +107,7 @@ export function CategoryReport({ incomeBreakdown, expenseBreakdown, incomeMonthl
                         Laporan Kategori
                     </h2>
                     <p className="text-slate-600 dark:text-slate-400 mt-1">
-                        Analisis pengeluaran dan pemasukan per kategori
+                        Analisis pengeluaran dan pemasukan per kategori &mdash; <span className="font-medium text-slate-800 dark:text-slate-200">{periodLabel}</span>
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -138,7 +151,7 @@ export function CategoryReport({ incomeBreakdown, expenseBreakdown, incomeMonthl
                                             cx="50%"
                                             cy="50%"
                                             labelLine={false}
-                                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                            label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                                             outerRadius={100}
                                             fill="#8884d8"
                                             dataKey="value"

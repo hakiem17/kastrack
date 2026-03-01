@@ -53,7 +53,7 @@ export default async function TransactionsPage({
         getWallets(),
         getTransactions(wallet.id, 100, 0, filters),
         getCategories(wallet.id),
-        getTransactions(wallet.id, 10000, 0)
+        getTransactions(wallet.id, 3000, 0)
     ])
 
     const walletOptions = wallets.map((w) => ({ id: w.id, name: w.name, currency: w.currency }))
