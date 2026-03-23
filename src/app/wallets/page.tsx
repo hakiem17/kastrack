@@ -8,6 +8,8 @@ import { createWalletAndStay, setActiveWallet } from "@/lib/actions"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
+export const dynamic = 'force-dynamic'
+
 export default async function WalletsPage() {
     const [activeWallet, wallets] = await Promise.all([
         getActiveWallet(),

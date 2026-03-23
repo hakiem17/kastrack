@@ -8,6 +8,8 @@ import { SettingsCreateUserForm } from "@/components/settings/SettingsCreateUser
 import { SettingsSetAdminAllButton } from "@/components/settings/SettingsSetAdminAllButton"
 import { SettingsUserList } from "@/components/settings/SettingsUserList"
 
+export const dynamic = 'force-dynamic'
+
 export default async function SettingsPage() {
     const [authResult, walletsWithRole] = await Promise.all([
         createClient().then((c) => c.auth.getUser()),

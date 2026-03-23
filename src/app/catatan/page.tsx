@@ -2,6 +2,8 @@ import { getActiveWallet, getWalletNote } from "@/lib/data"
 import { CreateWalletForm } from "@/components/wallet/CreateWalletForm"
 import { StickyNoteEditorClient } from "@/components/catatan/StickyNoteEditorClient"
 
+export const dynamic = 'force-dynamic'
+
 export default async function CatatanPage() {
     const wallet = await getActiveWallet()
 
