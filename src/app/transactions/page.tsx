@@ -25,7 +25,7 @@ export const dynamic = 'force-dynamic'
 export default async function TransactionsPage({
     searchParams,
 }: {
-    searchParams?: { [key: string]: string | string[] | undefined }
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
     const wallet = await getActiveWallet()
 
@@ -40,15 +40,18 @@ export default async function TransactionsPage({
         )
     }
 
+    // Await searchParams (required in Next.js 15+)
+    const params = await searchParams
+
     // Parse search params
     const filters = {
-        categoryId: searchParams?.category as string | undefined,
-        type: searchParams?.type as 'income' | 'expense' | undefined,
-        startDate: searchParams?.startDate as string | undefined,
-        endDate: searchParams?.endDate as string | undefined,
-        search: searchParams?.search as string | undefined,
-        sortBy: (searchParams?.sortBy as 'date' | 'amount' | 'category') || 'date',
-        sortOrder: (searchParams?.sortOrder as 'asc' | 'desc') || 'desc',
+        categoryId: params?.category as string | undefined,
+        type: params?.type as 'income' | 'expense' | undefined,
+        startDate: params?.startDate as string | undefined,
+        endDate: params?.endDate as string | undefined,
+        search: params?.search as string | undefined,
+        sortBy: (params?.sortBy as 'date' | 'amount' | 'category') || 'date',
+        sortOrder: (params?.sortOrder as 'asc' | 'desc') || 'desc',
     }
 
     const [wallets, transactions, categories, allTransactions] = await Promise.all([
